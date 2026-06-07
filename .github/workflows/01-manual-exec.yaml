@@ -48,7 +48,7 @@ jobs:
         uses: dawidd6/action-send-mail@v4
         with:
           # Endereço do servidor SMTP (Ex: Gmail)
-          server_address: ://gmail.com
+          server_address: smtp.gmail.com
           server_port: 465
           secure: true
           
