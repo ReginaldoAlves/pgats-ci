@@ -58,6 +58,6 @@ jobs:
           
           # Configurações do e-mail
           subject: Resultado do Job do GitHub Actions
-          to: seu-email@exemplo.com
-          from: 'Seu Nome <seu-email@exemplo.com>'
+          to: reginaldoalveslds@gmail.com
+          from: ${{ secrets.MAIL_USERNAME }}
           body: O pipeline do repositório ${{ github.repository }} foi executado!
