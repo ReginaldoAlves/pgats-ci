@@ -1,24 +1,31 @@
 # CI de Nível 02 - Execução Agendada
 
 # nome da pipeline
-name: 'Scheduled Execution'
+name: 'N2 - Execução Agendada'
 
 # gatilhos / triggers - regras de disparo
-# gatilho manual = workflow dispatch
+# gatilho manual = workflow_dispatch
+# gatilho agendado = schedule
 
 on:
+  workflow_dispatch:
+
   schedule:
     # cronograma de execução
-    # 1 - minuto, 2- hora, 3 - dia do mês, 4 - mês, 5 - dia da semana
-    - cron: '0 0 * * 0' # Roda meia noite aos domingos
-    # asterisco são os valores que não quero passar
+    # 1 - minuto, 2 - hora, 3 dia do mês, 4 - mês, 5 - dia da semana
 
-# tarefas dentro da pipeline = jobs
+    #Roda a cada 30 minutos
+    - cron: '*/30 * * * *'
+
+    #Roda toda sexta-feira à meia noite
+    - cron: '0 0 * * 5'
+
+#tarefas dentro da pipeline = jobs
 
 jobs:
-  # nome do job
+  #nome do job
   e2e-tests:
-    # máquina onde o job vai rodar
+    # maquina onde o job vai rodar
     runs-on: ubuntu-latest
 
     # passos do job
@@ -26,42 +33,30 @@ jobs:
       # clone do projeto
       - uses: actions/checkout@v4
 
-      # intalação do node
+      # instalção do node
       - uses: actions/setup-node@v4
         with:
           node-version: 24.x
 
-      # Instalação do Yarn
+      # instalação do Yarn
       - name: Instalando Yarn
         run: npm install -g yarn
 
-      # Instalação das dependências
+      #   instalação das dependências
       - name: Instalando dependências
         run: yarn
 
-      # Instalação do browsers do Playwright
-      - name: Instalando browsers do Playwright
+      # instalação dos Browsers do Playwright
+      - name: Instalando Browsers do Playwright
         run: yarn playwright install
 
-      # Executando testes e2e
+      # executar os testes e2e
       - name: Executando testes e2e
         run: yarn run e2e
 
-      # Enviar e-mail
-      - name: Enviar email com resultado
-        uses: dawidd6/action-send-mail@v4
+      - name: Salvando relatórios de testes
+        uses: actions/upload-artifact@v4
+        if: ${{ always() }}
         with:
-          # Endereço do servidor SMTP (Ex: Gmail)
-          server_address: ://gmail.com
-          server_port: 465
-          secure: true
-
-          # Suas credenciais salvas nos Secrets do GitHub
-          username: ${{ secrets.MAIL_USERNAME }}
-          password: ${{ secrets.MAIL_PASSWORD }}
-
-          # Configurações do e-mail
-          subject: Resultado do Job do GitHub Actions
-          to: seu-email@exemplo.com
-          from: 'Seu Nome <seu-email@exemplo.com>'
-          body: O pipeline do repositório ${{ github.repository }} foi executado!
+          path: ./playwright-report
+          name: Relatório de Testes E2E

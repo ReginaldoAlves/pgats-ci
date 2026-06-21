@@ -1,70 +1,58 @@
 # CI de Nível 03 - Disparo após a conclusão de outra pipeline
 
 # nome da pipeline
-name: 'Execução por Deploy'
+name: 'N3 -Execução por Deploy'
 
 # gatilhos / triggers - regras de disparo
-# gatilho manual = workflow dispatch
+# gatilho manual = workflow_dispatch
 # gatilho agendado = schedule
 # gatilho por conclusão de outra pipeline = workflow_run
 
 on:
   workflow_run:
-    workflows: ['Execução Manual']
+    workflows: ['N1 - Execução Manual', 'N2 - Execução Agendada']
     types:
       - completed
 
-# tarefas dentro da pipeline = jobs
+#tarefas dentro da pipeline = jobs
 
 jobs:
-  # nome do job
+  #nome do job
   e2e-tests:
-    # máquina onde o job vai rodar
+    # maquina onde o job vai rodar
     runs-on: ubuntu-latest
 
-    if: ${{ github.event.workflow_run.conclusion == 'success' }} # só executa se a pipe anterior passar
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     # passos do job
     steps:
       # clone do projeto
       - uses: actions/checkout@v4
 
-      # intalação do node
+      # instalção do node
       - uses: actions/setup-node@v4
         with:
           node-version: 24.x
 
-      # Instalação do Yarn
+      # instalação do Yarn
       - name: Instalando Yarn
         run: npm install -g yarn
 
-      # Instalação das dependências
+      #   instalação das dependências
       - name: Instalando dependências
         run: yarn
 
-      # Instalação do browsers do Playwright
-      - name: Instalando browsers do Playwright
+      # instalação dos Browsers do Playwright
+      - name: Instalando Browsers do Playwright
         run: yarn playwright install
 
-      # Executando testes e2e
+      # executar os testes e2e
       - name: Executando testes e2e
         run: yarn run e2e
 
-      # Enviar e-mail
-      - name: Enviar email com resultado
-        uses: dawidd6/action-send-mail@v4
+      - name: Salvando relatórios de testes
+        uses: actions/upload-artifact@v4
+        if: ${{ always() }}
         with:
-          # Endereço do servidor SMTP (Ex: Gmail)
-          server_address: ://gmail.com
-          server_port: 465
-          secure: true
-
-          # Suas credenciais salvas nos Secrets do GitHub
-          username: ${{ secrets.MAIL_USERNAME }}
-          password: ${{ secrets.MAIL_PASSWORD }}
-
-          # Configurações do e-mail
-          subject: Resultado do Job do GitHub Actions
-          to: seu-email@exemplo.com
-          from: 'Seu Nome <seu-email@exemplo.com>'
-          body: O pipeline do repositório ${{ github.repository }} foi executado!
+          path: ./playwright-report
+          name: Relatório de Testes E2E
