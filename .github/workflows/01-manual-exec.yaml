@@ -51,11 +51,11 @@ jobs:
           server_address: smtp.gmail.com
           server_port: 465
           secure: true
-          
+
           # Suas credenciais salvas nos Secrets do GitHub
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
-          
+
           # Configurações do e-mail
           subject: Resultado do Job do GitHub Actions
           to: reginaldoalveslds@gmail.com
